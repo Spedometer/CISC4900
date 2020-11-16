@@ -1,6 +1,8 @@
 # CISC4900
 CISC4900 Project Files
+
 Brian Chan
+
 bchan15@gmail.com
 
 Required to install the following libraries:
