@@ -2,11 +2,12 @@
 CISC4900 Project Files
 
 Required to install the following libraries:
->> pip install requests
->> pip install pandas
->> pip install pillows
+pip install requests
+pip install pandas
+pip install pillows
+
 got an numpy error, which was packaged with pandas, had to install older version:
->> pip install numpy==1.19.3
+pip install numpy==1.19.3
 
 iconbitmap stopped working, in the process of troubleshooting. 
 
