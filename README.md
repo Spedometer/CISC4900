@@ -6,15 +6,15 @@ bchan15@gmail.com
 <br/>
 <br/>
 Required to install the following libraries:
-<br/>
+<br/><br/>
 pip install requests
-<br/>
+<br/><br/>
 pip install pandas
-<br/>
+<br/><br/>
 pip install pillows
-<br/>
+<br/><br/><br/>
 got an numpy error, which was packaged with pandas, had to install older version:
-<br/>
+<br/><br/>
 pip install numpy==1.19.3
 <br/>
 <br/>
