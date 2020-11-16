@@ -3,8 +3,8 @@ CISC4900 Project Files
 <br/>
 Brian Chan
 bchan15@gmail.com
-<br/>
-<br/>
+<br/><br/>
+<br/><br/>
 Required to install the following libraries:
 <br/><br/>
 pip install requests
