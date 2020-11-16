@@ -8,7 +8,7 @@ bchan15@gmail.com
 
 
 
-Required to install the following libraries:
+Required to install the following libraries:<br/>
 
 pip install requests
 
@@ -23,7 +23,7 @@ pip install numpy==1.19.3
 
 
 
-
+<br/>
 iconbitmap stopped working, in the process of troubleshooting. 
 
 
