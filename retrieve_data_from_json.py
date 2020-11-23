@@ -3,14 +3,22 @@
 #
 # Current outputs are placeholders, intent is to past a Table with values to outputbox label
 from tkinter import *
-import json
 import retrieve_data_from_api as rd
-import pandas as pd
 import global_variables as gv
-import create_pandas_table
+import create_pandas_dataframe
 
 
-def retrieve_from_json(symbol_request, outputbox, api_key, default_dir, mid_right_top_frame, name_input):
+# Used to create container for symbol and data retrieved from Alpha Vantage
+# Trying to avoid saving .json hard copies onto hard drive
+# Attempt to create one massive variable failed with Memory Errors once 5000+ copies was exceeded in tests
+class AddSymbolData:
+    def __init__(self, symbol, symbol_json):
+        self.symbol = symbol
+        self.symbol_json = symbol_json
+
+
+# Function calculates averages of the open, high, low, close, and volume from json retrieved from api call
+def retrieve_from_json(symbol_request, outputbox, name_input):
     title = "Time Series (Daily)"
     symbol_request = symbol_request.upper()
     open_total = 0
@@ -20,11 +28,24 @@ def retrieve_from_json(symbol_request, outputbox, api_key, default_dir, mid_righ
     volume_total = 0
     count = 0
 
+    # Exit function if symbol_request is blank
+    if symbol_request == "":
+        return
+
+    # Commented lines were from previous version where data was stored locally on hard drive
     try:
-        combined_file_name = default_dir + '/' + symbol_request + '.json'
-        rd.retrieve_by_symbol(symbol_request, api_key, default_dir)
-        with open(combined_file_name) as symbol_json:
-            data = json.load(symbol_json)
+        # combined_file_name = gv.default_dir + '/' + symbol_request + '.json'
+        # rd.retrieve_by_symbol(symbol_request)
+        # with open(combined_file_name) as symbol_json:
+        #     data = json.load(symbol_json)
+
+        data = rd.retrieve_by_symbol(symbol_request)
+
+        # Adding symbol to user's symbol list
+        gv.user_input_list.append(symbol_request)
+
+        # Adding object containing symbol + json data retrieved from API to master datapoint list
+        gv.master_datapoint_list.append(AddSymbolData(symbol_request, data))
 
         for entry in data[title]:
             open_price = data[title][entry]["1. open"]
@@ -36,26 +57,24 @@ def retrieve_from_json(symbol_request, outputbox, api_key, default_dir, mid_righ
             high_total += float(high_price)
             low_total += float(low_price)
             close_total += float(close_price)
-            volume_total += float(volume)
+            volume_total += int(volume)
             count += 1
 
-        open_average = round((open_total / count),2)
-        high_average = round((high_total / count),2)
-        low_average = round((low_total / count), 2)
-        close_average = round((close_total / count), 2)
-        volume_average = round((volume_total / count), 2)
-
+        open_average = format(open_total / count, '.4f')
+        high_average = format(high_total / count, '.4f')
+        low_average = format(low_total / count, '.4f')
+        close_average = format(close_total / count, '.4f')
+        volume_average = (volume_total // count)
 
         try:
-            create_pandas_table.create_update_table(symbol_request, open_average,
-                                                high_average, low_average, close_average, volume_average, outputbox)
+            create_pandas_dataframe.create_outputbox1_dataframe(symbol_request, open_average,
+                                                                high_average, low_average, close_average,
+                                                                volume_average, outputbox)
+
         except Exception as e:
             print("create panda function error")
+            gv.dialog_text['text']="Create Panda Function Error"
 
-        # Label(mid_right_top_frame,
-        #                      text=('%s\t%s\t%s\t%s\t\t%s\t%s\n' % (symbol_request, open_average, high_average,
-        #                                                            low_average, close_average,
-        #                                                            volume_average)), justify=LEFT).pack()
         name_input.delete(0, END)
 
     except Exception as e:

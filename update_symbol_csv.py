@@ -4,10 +4,11 @@
 # May need to download directly from site for abstraction purposes, from current site above, or new site
 # Function to search if file is present and download if not may be needed
 import pandas as pd
+import global_variables as gv
 
 
-def update_symbol_csv(default_dir):
-    default_symbol_csv = default_dir + '/' + 'symbol_list/companylist.csv'
+def update_symbol_csv():
+    default_symbol_csv = gv.default_dir + '/' + 'symbol_list/companylist.csv'
     df = pd.read_csv(default_symbol_csv)
     df = df.dropna(how='all')
     df = df.dropna(axis=0, subset=['Sector'])

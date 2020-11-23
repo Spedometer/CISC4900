@@ -6,57 +6,110 @@
 from tkinter import *
 from tkinter import ttk
 from PIL import ImageTk, Image
-import requests
-import json
-import csv
-import pandas as pd
 import retrieve_data_from_json as rd
+import global_variables as gv
+import create_pandas_dataframe
+import standard_deviation
 
-default_dir = "CISC4900/Files"
-api_key = "XHVXGZR30PZIGH91"
+
+# When standard deviation tab is clicked, calls function to populate frame
+def on_tab_change(event):
+    tab = event.widget.tab('current')['text']
+    if tab == "Standard Deviation":
+        standard_deviation.calculate_std(outputbox, period)
+
+
+# When Time Series button is clicked and new entry data is updated, will default back to Time Series tab, since other
+# tabs will contain contents connected to previous symbol
+def view_selected():
+    try:
+        current_item = outputbox.item(outputbox.focus())
+        symbol = current_item['values'][0]
+        create_pandas_dataframe.create_outputbox2_dataframe(symbol)
+        tabControl.select(outputbox2_frame)
+
+    except IndexError:
+        gv.dialog_text['text'] = "Symbol has not been selected."
+
 
 HEIGHT = 800
 WIDTH = 1200
 
 root = Tk()
 root.title("Historic Data")
-# root.iconbitmap(default_dir + '/' + 'images' + '/' + 'BrooklynCollege.ico')
+# root.iconbitmap(gv.default_dir + '/' + 'images' + '/' + 'BrooklynCollege.ico')
 
 canvas = Canvas(root, height=HEIGHT, width=WIDTH)
 canvas.pack()
 
-top_frame = Frame(root, bg='#CCD9FF')
-top_frame.place(relx=.05, rely=.05, relheight=.1, relwidth=.9, anchor='nw')
-name_label = Label(top_frame, text="Enter Symbol: ", bg='#ccd9ff', font=30)
-name_label.place(relx=.05, rely=.25, relheight=.5, relwidth=.25, anchor='n')
-name_input = Entry(top_frame, font=30, bg='#D3D3D3')
-name_input.place(relx=.15, rely=.25, relheight=.45, relwidth=.075, anchor='n')
-submit_btn = Button(top_frame, text="SUBMIT", command=lambda:rd.retrieve_from_json(name_input.get(),
-                                                                                   outputbox, api_key, default_dir,
-                                                                                   mid_right_top_frame,
-                                                                                   name_input))
-submit_btn.place(relx=.25, rely=.25, relheight=.45, relwidth=.1, anchor='n')
+style = ttk.Style()
+style.theme_use("clam")
+style.configure("Treeview", background="#D3D3D3", foreground="black", rowheight=25, fieldbackground="#D3D3D3",
+                font=("Helvetica", "10"))
+style.map('Treeview', background=[('selected', 'silver')])
+style.configure("Treeview.Heading", font=("Helvetica", "11"), rowheight=30)
 
-mid_left_frame = Frame(root, bg='red')
-mid_left_frame.place(relx=.05, rely=.15, relheight=.8, relwidth=.15)
+top_frame = Frame(root, bg='#CCD9FF')
+top_frame.place(relx=0, rely=0, relheight=.1, relwidth=1, anchor='nw')
+title_label = Label(top_frame, text="CISC4900-Robo Trader", bg='#ccd9ff', font=("Helvetica", 20), justify=LEFT)
+title_label.place(relx=0, rely=.25, relheight=.5, relwidth=.25, anchor='nw')
+alpha_vantage_label = Label(top_frame, text="Data Points courtesy of Alpha Vantage", bg='#ccd9ff',
+                            font=("Helvetica", 15), justify=RIGHT)
+alpha_vantage_label.place(relx=.85, rely=.25, relheight=.5, relwidth=.4, anchor='n')
+
+
+mid_left_frame = Frame(root, bg='#CCD9FF')
+mid_left_frame.place(relx=0, rely=.1, relheight=.875, relwidth=.2)
+name_input = Entry(mid_left_frame, font=30, bg='#D3D3D3')
+name_input.place(relx=.5, rely=0, relheight=.1, relwidth=.7, anchor='n')
+submit_btn = Button(mid_left_frame, text="Temporary\nSUBMIT Button",
+                    command=lambda: rd.retrieve_from_json(name_input.get(), outputbox, name_input))
+submit_btn.place(relx=.5, rely=.1, relheight=.1, relwidth=.7, anchor='n')
+details_btn = Button(mid_left_frame, text="View Time Series\nof Selected Symbol", command=view_selected)
+details_btn.place(relx=.5, rely=.2, relheight=.1, relwidth=.7, anchor='n')
+
 
 mid_right_top_frame = LabelFrame(root, bg='#FAEBD7', highlightbackground='black', highlightcolor='black',
-                            highlightthickness=1)
-mid_right_top_frame.place(relx=.2, rely=.15, relheight=.4, relwidth=.75)
-# header_label = Label(mid_right_top_frame, text="StockSymbol\t\tOpen Avg\tHigh Avg\tLow Avg\t\tClose Avg\tVolume Avg")
-# header_label.pack()
-
-
+                                 highlightthickness=1)
+mid_right_top_frame.place(relx=.2, rely=.1, relheight=.438, relwidth=.799)
 outputbox = ttk.Treeview(mid_right_top_frame)
 outputbox.place(relheight=1, relwidth=1)
-
 outputbox_scrolly = Scrollbar(mid_right_top_frame, orient="vertical", command=outputbox.yview)
-outputbox_scrollx = Scrollbar(mid_right_top_frame, orient="horizontal", command=outputbox.xview)
-outputbox.configure(yscrollcommand=outputbox_scrolly, xscrollcommand=outputbox_scrollx)
-outputbox_scrollx.pack(side="bottom", fill="x")
+outputbox.configure(yscrollcommand=outputbox_scrolly.set)
 outputbox_scrolly.pack(side="right", fill="y")
 
-mid_right_bottom_frame = Frame(root, bg='green')
-mid_right_bottom_frame.place(relx=.2, rely=.55, relheight=.4, relwidth=.75)
+
+mid_right_bottom_frame = Frame(root, bg='#D3D3D3', highlightbackground='black', highlightcolor='black',
+                               highlightthickness=1)
+mid_right_bottom_frame.place(relx=.2, rely=.54, relheight=.4347, relwidth=.799)
+
+tabControl = ttk.Notebook(mid_right_bottom_frame)
+
+outputbox2_frame = Frame(tabControl)
+gv.outputbox2 = ttk.Treeview(outputbox2_frame)
+gv.outputbox2.place(relheight=1, relwidth=1)
+outputbox2_scrolly = Scrollbar(outputbox2_frame, orient="vertical", command=gv.outputbox2.yview)
+gv.outputbox2.configure(yscrollcommand=outputbox2_scrolly)
+outputbox2_scrolly.pack(side="right", fill="y")
+
+standard_deviation_frame = Frame(tabControl)
+gv.std_dev_outputbox = ttk.Treeview(standard_deviation_frame)
+gv.std_dev_outputbox.place(relheight=1, relwidth=1)
+std_dev_outputbox_scrolly = Scrollbar(standard_deviation_frame, orient="vertical", command=gv.std_dev_outputbox.yview)
+gv.std_dev_outputbox.configure(yscrollcommand=std_dev_outputbox_scrolly)
+std_dev_outputbox_scrolly.pack(side="right", fill="y")
+
+tabControl.add(outputbox2_frame, text="Time Series")
+tabControl.add(standard_deviation_frame, text="Standard Deviation")
+tabControl.pack(expand=1, fill="both")
+
+tabControl.bind('<<NotebookTabChanged>>', on_tab_change)
+
+dialog_frame = Frame(root, bg="silver")
+dialog_frame.place(relx=0, rely=.975, relheight=.025, relwidth=1)
+gv.dialog_text = Label(dialog_frame, text="Status updates will go here", bg="silver", relief=RIDGE)
+gv.dialog_text.pack(anchor=E)
+
+period = 10
 
 root.mainloop()

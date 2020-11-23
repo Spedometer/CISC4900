@@ -5,18 +5,29 @@
 # Also need to implement solution to prevent invalid entries from having .json files created
 import json
 import requests
+import global_variables as gv
 
 
-def retrieve_by_symbol(symbol, api_key, default_dir):
+# Commented lines were from previous version where data from API was copied to hard drive
+def retrieve_by_symbol(symbol):
     symbol = symbol.upper()
     url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY"
     outputsize = ""
-    params = {'apikey': api_key, 'symbol': symbol, 'outputsize':outputsize}
-    api_request = requests.get(url, params)
+    params = {'apikey': gv.api_key, 'symbol': symbol, 'outputsize': outputsize}
+
+    try:
+        api_request = requests.get(url, params)
+    except Exception as e:
+        gv.dialog_text['text'] = "Issue with API key and/or parameters."
+        return
+
     api = json.loads(api_request.content)
-    symbol_file_name = default_dir + '/' + symbol + '.json'
-    with open(symbol_file_name, 'w') as json_file:
-        json.dump(api, json_file)
+
+    # symbol_file_name = gv.default_dir + '/' + symbol + '.json'
+    # with open(symbol_file_name, 'w') as json_file:
+    #     json.dump(api, json_file)
+
+    return api
 
 # Below code used to test above.
 # api_key = "XHVXGZR30PZIGH91"
