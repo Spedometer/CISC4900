@@ -7,13 +7,12 @@ from tkinter import *
 # Extracted data from multiple for loops, needed average of Close prices first before reiterating through Time Series
 # to get deviation from average and square of that deviation. Reiterating a third time based on a default period
 # of 10 entries (will be able to be chosen by user) to conclude with Standard Deviation value
-def calculate_std(outputbox, period):
-    gv.std_dev_outputbox.delete(*gv.std_dev_outputbox.get_children())
+def calculate_std(period):
+    # gv.std_dev_outputbox.delete(*gv.std_dev_outputbox.get_children())
 
     try:
-        current_item = outputbox.item(outputbox.focus())
+        current_item = gv.user_list_outputbox.item(gv.user_list_outputbox.focus())
         symbol = current_item['values'][0]
-
     except IndexError:
         print("No symbol selected")
         return
@@ -54,18 +53,65 @@ def calculate_std(outputbox, period):
         else:
             final_std_deviation_list.append(" ")
 
-    gv.std_dev_outputbox["column"] = ["Date", "Deviation", "Dev Squared", "Standard Dev"]
-    gv.std_dev_outputbox["show"] = "headings"
+    return deviation_list, deviation_squared_list, final_std_deviation_list
 
-    gv.std_dev_outputbox.column("Date", anchor=CENTER, width=100)
-    gv.std_dev_outputbox.column("Deviation", anchor=CENTER, width=100)
-    gv.std_dev_outputbox.column("Dev Squared", anchor=CENTER, width=100)
-    gv.std_dev_outputbox.column("Standard Dev", anchor=CENTER, width=100)
 
-    for column in gv.std_dev_outputbox["columns"]:
-        gv.std_dev_outputbox.heading(column, text=column, anchor=CENTER)
+def calculate_moving_averages():
+    gv.std_dev_outputbox.delete(*gv.std_dev_outputbox.get_children())
 
-    for index in range(0, len(dates_list)):
-        gv.std_dev_outputbox.insert(parent='', iid=index, index='end', values=(dates_list[index], deviation_list[index],
-                                                                               deviation_squared_list[index],
-                                                                               final_std_deviation_list[index]))
+    try:
+        current_item = gv.user_list_outputbox.item(gv.user_list_outputbox.focus())
+        symbol = current_item['values'][0]
+    except IndexError:
+        print("No symbol selected")
+        return
+
+    period = 10
+    sum = 0
+
+    moving_avg_list = []
+    deviation_list = []
+    close_price_list = []
+
+    for i in range(0, period-1):
+        moving_avg_list.append("")
+        deviation_list.append("")
+
+    selected_symbol_index = gv.user_input_list.index(symbol)
+    for date in gv.master_datapoint_list[selected_symbol_index].symbol_json["Time Series (Daily)"]:
+        close_price_list.append(gv.master_datapoint_list[selected_symbol_index].symbol_json["Time Series (Daily)"]
+                                [date]["4. close"])
+
+    # print("Close Price List:", close_price_list)
+
+    index_counter, count, sum, average, last_close_price, deviation = 0, 0, 0, 0, 0, 0
+
+    for price in close_price_list:
+        index_counter += 1
+        if index_counter <= len(close_price_list) - 9:
+            sum = 0
+            count = 0
+            for entry in close_price_list[index_counter - 1: index_counter + 9]:
+                entry = float(entry)
+                sum += entry
+                count += 1
+                last_close_price = entry
+            average = sum/count
+            deviation = last_close_price - average
+            moving_avg_list.append('{0:.4f}'.format(average))
+            deviation_list.append('{0:.4f}'.format(deviation))
+
+    gv.moving_avg_datapoint_list.append([symbol, moving_avg_list[period], deviation_list[period]])
+    remove_duplicates = []
+    [remove_duplicates.append(x) for x in gv.moving_avg_datapoint_list if x not in remove_duplicates]
+    gv.moving_avg_datapoint_list = remove_duplicates
+    # print("Updated list:", gv.moving_avg_datapoint_list)
+
+    return moving_avg_list, deviation_list
+
+
+
+
+
+
+

@@ -12,7 +12,7 @@ import global_variables as gv
 def retrieve_by_symbol(symbol):
     symbol = symbol.upper()
     url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY"
-    outputsize = ""
+    outputsize = "compact"
     params = {'apikey': gv.api_key, 'symbol': symbol, 'outputsize': outputsize}
 
     try:
