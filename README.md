@@ -27,8 +27,8 @@ Format would resemble below:
 import global_variables as gv
 <br/><br/>
 
-api_key = "---------@AMER.OAUTHAP"
-token_path = gv.default_dir + "/token.pickle"
-redirect_uri = "http://localhost"
+api_key = "---------@AMER.OAUTHAP"<br/>
+token_path = gv.default_dir + "/token.pickle"<br/>
+redirect_uri = "http://localhost"<br/>
 
 account_id = "---------------------------------------------------"
